@@ -1,21 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
+import 'react-native-gesture-handler';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import MainTabNavigator from './navigation/MainTabNavigator';
+import LoginStackNavigator from './navigation/LoginStackNavigator';
+import ApiKeys from './constants/ApiKeys';
+import * as firebase from 'firebase';
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+
+export default class App extends React.Component
+{
+  constructor(props){
+    super(props);
+    this.state = {
+      isAuthenticated: false,
+    };
+    if (!firebase.apps.length){
+      firebase.initializeApp(ApiKeys.firebaseConfig);
+    }
+    firebase.auth().onAuthStateChanged(this.onAuthChange);
+  }
+
+  onAuthChange = (user) => {
+    this.setState({isAuthenticated: !!user});
+  }
+
+  render(){
+    if (this.state.isAuthenticated){
+      // If logged in, show Main Tab Navigator
+      return (
+        <NavigationContainer>
+          <MainTabNavigator />
+        </NavigationContainer>
+      );
+    } else {
+      return (
+        <NavigationContainer>
+          <LoginStackNavigator />
+        </NavigationContainer>
+      );
+    }
+  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
