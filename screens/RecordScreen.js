@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
 import Header from '../components/header';
+import Loading from '../components/loading';
+import NoAccess from '../components/noAccess';
+import ApiKeys from '../constants/ApiKeys';
 import { Camera } from 'expo-camera';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons'; 
-import { render } from 'react-dom';
 
 
 export default class RecordScreen extends React.Component
@@ -25,14 +27,30 @@ export default class RecordScreen extends React.Component
     if (this.camera) {
       let photo = await this.camera.takePictureAsync();
     }
+    // http://api.foodai.org/v1/classify?image_url=https://example.jpg&num_tag=5&api_key=[YOUR KEY HERE]
+    // Call to FoodAI image recognition API
+    const response = fetch("http://api.foodai.org/v1/classify?image_url=https://pixabay.com/photos/hamburger-burger-barbeque-bbq-beef-1238246&num_tag=5&api_key=" + ApiKeys.foodAI.apiKey)
+      .then(response => response.json())
+      .then(data => console.log(data));
+
   }
 
   render(){
     if (this.state.hasPermission === null) {
-      return <View />;
+      return (
+        <View>
+          <Header />
+          <Loading />
+        </View>
+      )
     }
     if (this.state.hasPermission === false) {
-      return <Text>No access to camera</Text>;
+      return (
+        <View>
+          <Header />
+          <NoAccess />
+        </View>
+      )
     }
     return (
       <View style={styles.container} >
