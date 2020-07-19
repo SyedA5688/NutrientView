@@ -19,6 +19,11 @@ export default class SignupScreen extends React.Component
       Alert.alert("Passwords do not match");
       return;
     }
+    else if (this.state.password.length < 5) {
+      Alert.alert("Please make your password at least 6 characters");
+      return;
+    }
+
     firebase.auth().createUserWithEmailAndPassword(this.state.email, this.state.password)
       .then(() => {
         // Successful signup handled in MonitorScreen.js by onAuthChange event listener

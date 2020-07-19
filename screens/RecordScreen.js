@@ -1,13 +1,15 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Alert, Button } from 'react-native';
 import Header from '../components/header';
 import Loading from '../components/loading';
 import NoAccess from '../components/noAccess';
 import ApiKeys from '../constants/ApiKeys';
+import ImageModal from '../components/imageModal';
 import { Camera } from 'expo-camera';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { FontAwesome5, Ionicons, Feather } from '@expo/vector-icons';
 import base64 from 'react-native-base64';
-import { ImagePicker } from 'expo';
+import UUIDGenerator from 'react-native-uuid-generator';
 import * as firebase from 'firebase';
 
 
@@ -18,6 +20,8 @@ export default class RecordScreen extends React.Component
     this.state = {
       hasPermission: null,
       type: Camera.Constants.Type.back,
+      showImageResultsModal: false,
+      imageRecognition: [],
     }
   }
 
@@ -26,18 +30,37 @@ export default class RecordScreen extends React.Component
     this.setState({hasPermission: status === 'granted'});
   }
 
+  onImagePickPress = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.cancelled) {
+        // Upload image to firebase, get image url IBM Watson API
+        const response = this.uploadImageToFirebase(result.uri);
+      }
+    }
+    catch (E) {
+      console.log(E);
+    }
+  }
+
   onShutterPress = async () => {
     let photo;
     if (this.camera) {
       photo = await this.camera.takePictureAsync();
     }
     // Upload image to firebase, get image url IBM Watson API
-    let time = Date.now().toString(); // Name of image will be the time created, in milliseconds since Jan 1, 1970, 00:00:00 UTC
-    const response = this.uploadImageToFirebase(photo.uri, time);
+    const response = this.uploadImageToFirebase(photo.uri);
   }
 
-  uploadImageToFirebase = async (fileUri, time) => {
+  uploadImageToFirebase = async (fileUri) => {
     let uid = firebase.auth().currentUser.uid;
+    let time = Date.now().toString(); // Name of image will be the time created, in milliseconds since Jan 1, 1970, 00:00:00 UTC
     const imageRef = firebase.storage().ref().child("users").child(uid).child("images").child(time);
 
     // Upload Image to firebase, need to use Javascript Blob API*
@@ -49,7 +72,7 @@ export default class RecordScreen extends React.Component
         return imageRef.getDownloadURL();
       })
       .then(url => {
-        console.log("Firebase URL: " + url);
+        //console.log("Firebase URL: " + url);
         this.callImageRecognition(url);
       })
       .catch(error => {
@@ -68,7 +91,22 @@ export default class RecordScreen extends React.Component
                             + encodeURIComponent(fileUrl) + "&version=2018-03-19&classifier_ids=food", options)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        //console.log(data);
+        console.log(data.images[0].classifiers[0].classes);
+        this.setState({ image_recognition: data.images[0].classifiers[0].classes.map(obj => {
+          // ***Revise code to map response array
+          let randomID;
+          UUIDGenerator.getRandomUUID((uuid) => {
+            randomID = uuid;
+          });
+
+          return (
+            {
+              id: randomID,
+              title: obj.class
+            }
+          )
+        }) });
       })
       .catch(error => {
         Alert.alert("Error in uploading image: " + error);
@@ -76,8 +114,8 @@ export default class RecordScreen extends React.Component
       })
   }
 
-  onImagePickPress = async () => {
-    // let result = await ImagePicker.launchImageLibraryAsync();
+  toggleModal = () => {
+    this.setState({ showImageResultsModal: !this.state.showImageResultsModal })
   }
 
   render(){
@@ -90,11 +128,14 @@ export default class RecordScreen extends React.Component
     return (
       <View style={styles.container} >
         <Header />
+        <ImageModal {...this.state} toggleModal={this.toggleModal} />
+
         <Camera 
           style={styles.camera} 
           type={this.state.type} 
           ref={ref => { this.camera = ref; }}
         >
+          <Button title="Toggle Modal" onPress={this.toggleModal} />
           <View style={styles.cameraCaptionBox} >
             <Text style={styles.cameraCaptionText} >Please allow several seconds for image processing</Text>
           </View>
@@ -102,19 +143,16 @@ export default class RecordScreen extends React.Component
 
         {/* Controls */}
         <View style={styles.cameraControlsContainer} >
-          <TouchableOpacity style={styles.manualEntryBox} >
-            <FontAwesome5 name="pencil-alt" size={20} color="grey" />
+          <TouchableOpacity onPress={this.onImagePickPress} >
+            <Feather name="image" size={40} color="grey" />
           </TouchableOpacity>
+
           <TouchableOpacity onPress={this.onShutterPress} >
             <Ionicons name="ios-radio-button-on" size={90} color="grey" />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => {
-            this.setState({
-              type: this.state.type === Camera.Constants.Type.back
-              ? Camera.Constants.Type.front : Camera.Constants.Type.back
-            });
-          }} >
-            <Ionicons name="md-reverse-camera" size={40} color="grey" />
+
+          <TouchableOpacity style={styles.manualEntryBox} >
+            <FontAwesome5 name="pencil-alt" size={20} color="grey" />
           </TouchableOpacity>
         </View>
       </View>

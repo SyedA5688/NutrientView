@@ -18,7 +18,7 @@ export default class LoginScreen extends React.Component
       .then(() => {
         //console.log("Logged in successfully");
       }, (error) => {
-        Alert.alert("Was not able to log in, try again");
+        Alert.alert(error);
       });
   }
 
