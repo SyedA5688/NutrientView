@@ -9,7 +9,6 @@ import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome5, Ionicons, Feather } from '@expo/vector-icons';
 import base64 from 'react-native-base64';
-import UUIDGenerator from 'react-native-uuid-generator';
 import * as firebase from 'firebase';
 
 
@@ -28,6 +27,13 @@ export default class RecordScreen extends React.Component
   async componentDidMount() {
     const { status } = await Camera.requestPermissionsAsync();
     this.setState({hasPermission: status === 'granted'});
+  }
+
+  guidGenerator = () => {
+    var S4 = () => {
+      return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
   }
 
   onImagePickPress = async () => {
@@ -92,21 +98,16 @@ export default class RecordScreen extends React.Component
       .then(response => response.json())
       .then(data => {
         //console.log(data);
-        console.log(data.images[0].classifiers[0].classes);
-        this.setState({ image_recognition: data.images[0].classifiers[0].classes.map(obj => {
-          // ***Revise code to map response array
-          let randomID;
-          UUIDGenerator.getRandomUUID((uuid) => {
-            randomID = uuid;
-          });
-
-          return (
-            {
-              id: randomID,
-              title: obj.class
-            }
+        //console.log(data.images[0].classifiers[0].classes);
+        this.setState({ imageRecognition: data.images[0].classifiers[0].classes.map(obj => (
+          {
+            id: this.guidGenerator(),
+            title: obj.class
+          }
           )
-        }) });
+        ) });
+      
+      this.toggleModal();
       })
       .catch(error => {
         Alert.alert("Error in uploading image: " + error);
