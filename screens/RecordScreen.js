@@ -107,7 +107,7 @@ export default class RecordScreen extends React.Component
           )
         ) });
       
-      this.toggleModal();
+        this.toggleModal();
       })
       .catch(error => {
         Alert.alert("Error in uploading image: " + error);
@@ -117,6 +117,22 @@ export default class RecordScreen extends React.Component
 
   toggleModal = () => {
     this.setState({ showImageResultsModal: !this.state.showImageResultsModal })
+  }
+
+  getNutritionData = async (quantity, foodName) => {
+    // Call nutrition api, replace spaces with %20
+    // https://api.edamam.com/api/nutrition-data?app_id=fdd908ae&ingr=3%20beef%20tacos
+    const regex = / /g;
+    let percentEncodedFoodName = foodName.replace(regex, '%20'); // Replace spaces in food name with %20
+    const response = fetch("https://api.edamam.com/api/nutrition-data?app_id=fdd908ae&ingr=" + quantity + "%20" + percentEncodedFoodName)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        Alert.alert("Error in retrieving nutritional information: " + error);
+        return;
+      })
   }
 
   render(){
@@ -129,7 +145,7 @@ export default class RecordScreen extends React.Component
     return (
       <View style={styles.container} >
         <Header />
-        <ImageModal {...this.state} toggleModal={this.toggleModal} />
+        <ImageModal {...this.state} toggleModal={this.toggleModal} getNutritionData={this.getNutritionData} />
 
         <Camera 
           style={styles.camera} 
