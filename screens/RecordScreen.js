@@ -5,12 +5,16 @@ import Loading from '../components/loading';
 import NoAccess from '../components/noAccess';
 import ApiKeys from '../constants/ApiKeys';
 import ImageModal from '../components/imageModal';
+import SuccessModal from '../components/successModal';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome5, Ionicons, Feather } from '@expo/vector-icons';
 import base64 from 'react-native-base64';
 import * as firebase from 'firebase';
 
+
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", 
+  "September", "October", "November", "December"];
 
 export default class RecordScreen extends React.Component
 {
@@ -20,7 +24,9 @@ export default class RecordScreen extends React.Component
       hasPermission: null,
       type: Camera.Constants.Type.back,
       showImageResultsModal: false,
+      showSuccessModal: false,
       imageRecognition: [],
+      nutrientList: {},
     }
   }
 
@@ -116,23 +122,53 @@ export default class RecordScreen extends React.Component
   }
 
   toggleModal = () => {
-    this.setState({ showImageResultsModal: !this.state.showImageResultsModal })
+    this.setState({ showImageResultsModal: !this.state.showImageResultsModal });
+  }
+
+  toggleSuccessModal = () => {
+    this.setState({ showSuccessModal: !this.state.showSuccessModal });
   }
 
   getNutritionData = async (quantity, foodName) => {
     // Call nutrition api, replace spaces with %20
-    // https://api.edamam.com/api/nutrition-data?app_id=fdd908ae&ingr=3%20beef%20tacos
     const regex = / /g;
     let percentEncodedFoodName = foodName.replace(regex, '%20'); // Replace spaces in food name with %20
-    const response = fetch("https://api.edamam.com/api/nutrition-data?app_id=fdd908ae&ingr=" + quantity + "%20" + percentEncodedFoodName)
+    const response = fetch("https://api.edamam.com/api/nutrition-data?app_id=" + ApiKeys.EdamamNutritionAPI.appID + "&app_key=" + 
+                            ApiKeys.EdamamNutritionAPI.appKey + "&ingr=" + quantity + "%20" + percentEncodedFoodName)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        //console.log(data.totalNutrients);
+        this.setState({ nutrientList: data.totalNutrients });
+        this.updateNutritionDataInFirebase();
+        this.toggleSuccessModal();
       })
       .catch(error => {
         Alert.alert("Error in retrieving nutritional information: " + error);
         return;
       })
+  }
+
+  updateNutritionDataInFirebase = () => {
+    // Upload nutrition data to firebase database
+    let uid = firebase.auth().currentUser.uid;
+    let time = new Date();
+    let dateStr = time.getMonth() + "-" + time.getDate()
+    const databaseRef = firebase.database().ref().child('users').child(uid).child("Nutrient").child(time.getFullYear()).child(monthNames[time.getMonth()]).child(dateStr);
+    databaseRef.once("value").then(function(snapshot) {
+      if (snapshot.exists()) {
+        databaseRef.update(this.state.nutrientList)
+          .then(() => {
+            console.log('Successful Update of nutrition information in firebase');
+          })
+          .catch((error) => {
+            Alert.alert("Was not able to update nutrition information: " + error);
+          })
+      }
+      else {
+        // Need to update/add to values in firebase database, not create new branch
+        
+      }
+    });
   }
 
   render(){
@@ -146,6 +182,7 @@ export default class RecordScreen extends React.Component
       <View style={styles.container} >
         <Header />
         <ImageModal {...this.state} toggleModal={this.toggleModal} getNutritionData={this.getNutritionData} />
+        <SuccessModal {...this.state} toggleSuccessModal={this.toggleSuccessModal} />
 
         <Camera 
           style={styles.camera} 
