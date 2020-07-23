@@ -121,15 +121,7 @@ export default class RecordScreen extends React.Component
       })
   }
 
-  toggleModal = () => {
-    this.setState({ showImageResultsModal: !this.state.showImageResultsModal });
-  }
-
-  toggleSuccessModal = () => {
-    this.setState({ showSuccessModal: !this.state.showSuccessModal });
-  }
-
-  getNutritionData = async (quantity, foodName) => {
+  getNutritionData = async (quantity, foodName, meal) => {
     // Call nutrition api, replace spaces with %20
     const regex = / /g;
     let percentEncodedFoodName = foodName.replace(regex, '%20'); // Replace spaces in food name with %20
@@ -137,9 +129,11 @@ export default class RecordScreen extends React.Component
                             ApiKeys.EdamamNutritionAPI.appKey + "&ingr=" + quantity + "%20" + percentEncodedFoodName)
       .then(response => response.json())
       .then(data => {
-        //console.log(data.totalNutrients);
+        if ("SUGAR.added" in data.totalNutrients) {
+          delete data.totalNutrients["SUGAR.added"];
+        }
         this.setState({ nutrientList: data.totalNutrients });
-        this.updateNutritionDataInFirebase();
+        this.updateFirebaseData(quantity, foodName, meal);
         this.toggleSuccessModal();
       })
       .catch(error => {
@@ -148,27 +142,41 @@ export default class RecordScreen extends React.Component
       })
   }
 
-  updateNutritionDataInFirebase = () => {
+  updateFirebaseData = (quantity, foodName, meal) => {
     // Upload nutrition data to firebase database
     let uid = firebase.auth().currentUser.uid;
     let time = new Date();
     let dateStr = time.getMonth() + "-" + time.getDate()
-    const databaseRef = firebase.database().ref().child('users').child(uid).child("Nutrient").child(time.getFullYear()).child(monthNames[time.getMonth()]).child(dateStr);
-    databaseRef.once("value").then(function(snapshot) {
-      if (snapshot.exists()) {
-        databaseRef.update(this.state.nutrientList)
-          .then(() => {
-            console.log('Successful Update of nutrition information in firebase');
-          })
-          .catch((error) => {
-            Alert.alert("Was not able to update nutrition information: " + error);
-          })
+    const databaseRef = firebase.database().ref().child('users').child(uid).child("NutritionReports").child(time.getFullYear()).child(monthNames[time.getMonth()]).child(dateStr);
+    // Update nutrient info in firebase
+    databaseRef.child("Nutrients").once("value").then(snapshot => {
+      if (!snapshot.exists()) {
+        databaseRef.child("Nutrients").set(this.state.nutrientList);
       }
       else {
-        // Need to update/add to values in firebase database, not create new branch
-        
+        // Update/Add to nutrient values in firebase database, not create new branch
+        let newNutrientList = this.state.nutrientList;
+        let databaseObj = snapshot.val();
+        for (let key in newNutrientList) {
+          if (key in databaseObj) {
+            newNutrientList[key].quantity += databaseObj[key].quantity;
+          }
+        }
+        databaseRef.child("Nutrients").update(newNutrientList);
       }
+      console.log("Updated data in firebase");
     });
+
+    // Update food name and meal in firebase
+    databaseRef.child(meal).push(foodName);
+  }
+
+  toggleModal = () => {
+    this.setState({ showImageResultsModal: !this.state.showImageResultsModal });
+  }
+
+  toggleSuccessModal = () => {
+    this.setState({ showSuccessModal: !this.state.showSuccessModal });
   }
 
   render(){
