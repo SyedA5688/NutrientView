@@ -1,25 +1,24 @@
 import React from 'react';
-import { StyleSheet, Text, View, Dimensions, Button, FlatList, TouchableOpacity,
+import { StyleSheet, Text, View, Dimensions, Button, TouchableOpacity,
           Alert, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import Modal from 'react-native-modal';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { Ionicons } from '@expo/vector-icons';
 
 
-export default class ImageModal extends React.Component
+export default class ManualEntrymageModal extends React.Component
 {
   constructor(props) {
     super(props);
     this.state = {
       selectedMeal: "Lunch",
-      selectedId: null,
-      selectedFood: null,
+      enteredFood: null,
       quantity: "1",
     }
   }
 
-  toggleModalView = () => {
-    this.props.toggleModal();
+  toggleModal = () => {
+    this.props.toggleManualEntryModal();
   }
 
   onEnterPress = () => {
@@ -27,24 +26,19 @@ export default class ImageModal extends React.Component
       Alert.alert("Please enter a food quantity");
       return;
     }
-    else if (this.state.selectedFood == null) {
-      Alert.alert("Please select a food option, or cancel");
+    else if (this.state.enteredFood == null) {
+      Alert.alert("Please enter the name of a food item, or cancel");
       return;
     }
-
-    // Send request to nutrition API, add to daily log of nutrients
-    //console.log("Meal: " + this.state.selectedMeal + ", Quantity: " + this.state.quantity + ", Selected Food: " + this.state.selectedFood);
-    this.props.getNutritionData(this.state.quantity, this.state.selectedFood, this.state.selectedMeal);
-
-    // Close modal, reset state
-    this.toggleModalView();
-    this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, quantity: "1" });
+    this.props.getNutritionData(this.state.quantity, this.state.enteredFood, this.state.selectedMeal);
+    this.toggleModal();
+    this.setState({ selectedMeal: "Lunch", enteredFood: null, quantity: "1" });
     
   }
 
   onCancelPress = () => {
-    this.toggleModalView();
-    this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, quantity: "1" });
+    this.toggleModal();
+    this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, });
   }
   
   render(){
@@ -63,7 +57,7 @@ export default class ImageModal extends React.Component
 
     return (
       <View>
-        <Modal isVisible={this.props.showImageResultsModal} style={styles.modal} >
+        <Modal isVisible={this.props.showManualEntryModal} style={styles.modal} >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
             <View style={styles.modalView} >
               <View style={[styles.modalHeader,{...(Platform.OS !== 'android' && { zIndex: 10 })}]} >
@@ -94,14 +88,14 @@ export default class ImageModal extends React.Component
                 />
               </View>
 
-              <View style={styles.flatListContainer} >
-                <FlatList 
-                  data={this.props.imageRecognition}
-                  renderItem={renderItem}
-                  keyExtractor={(item) => item.id}
-                  extraData={this.state.selectedId}
-                  style={{ width: '80%' }}
-                />
+              <View style={styles.textInputContainer} >
+              <TextInput style={styles.textInput} 
+                value={this.state.email}
+                onChangeText={(text) => { this.setState({ enteredFood: text }) }}
+                placeholder="Food Item"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
               </View>
 
               <View style={styles.buttonContainer} >
@@ -131,7 +125,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    //zIndex: 10,
   },
   modalText: {
     fontSize: 20,
@@ -140,7 +133,7 @@ const styles = StyleSheet.create({
   quantityInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 15,
   },
   quantityInput: {
     height: 40,
@@ -151,23 +144,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 5,
   },
-  flatListContainer: {
-    width: '100%', 
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  flatListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  textInputContainer: {
     width: '100%',
-    paddingVertical: 5,
-    borderColor: 'grey',
-    borderTopWidth: 0.5,
-    borderBottomWidth: 0.5,
+    marginBottom: 15,
+    alignItems: 'center',
   },
-  flatListItemText: {
-    fontSize: 15,
-    marginLeft: 10,
+  textInput: {
+    width: '80%',
+    height: 50,
+    borderWidth: 1,
+    borderColor: 'lightgray',
+    borderRadius: 5
   },
   buttonContainer: {
     flexDirection: 'row',

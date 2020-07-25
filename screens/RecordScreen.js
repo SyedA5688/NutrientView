@@ -6,6 +6,7 @@ import NoAccess from '../components/noAccess';
 import ApiKeys from '../constants/ApiKeys';
 import ImageModal from '../components/imageModal';
 import SuccessModal from '../components/successModal';
+import ManualEntryModal from '../components/manualEntryModal';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { FontAwesome5, Ionicons, Feather } from '@expo/vector-icons';
@@ -25,6 +26,7 @@ export default class RecordScreen extends React.Component
       type: Camera.Constants.Type.back,
       showImageResultsModal: false,
       showSuccessModal: false,
+      showManualEntryModal: false,
       imageRecognition: [],
       nutrientList: {},
     }
@@ -129,6 +131,10 @@ export default class RecordScreen extends React.Component
                             ApiKeys.EdamamNutritionAPI.appKey + "&ingr=" + quantity + "%20" + percentEncodedFoodName)
       .then(response => response.json())
       .then(data => {
+        if (data != null && data["calories"] == 0) {
+          Alert.alert("Was not able to find food item in database, unable to log nutrients");
+          return;
+        }
         if ("SUGAR.added" in data.totalNutrients) {
           delete data.totalNutrients["SUGAR.added"];
         }
@@ -168,7 +174,9 @@ export default class RecordScreen extends React.Component
     });
 
     // Update food name and meal in firebase
-    databaseRef.child(meal).push(foodName);
+    databaseRef.child("Meals").child(meal).push({
+      "food": foodName
+    });
   }
 
   toggleModal = () => {
@@ -177,6 +185,10 @@ export default class RecordScreen extends React.Component
 
   toggleSuccessModal = () => {
     this.setState({ showSuccessModal: !this.state.showSuccessModal });
+  }
+
+  toggleManualEntryModal = () => {
+    this.setState({ showManualEntryModal: !this.state.showManualEntryModal });
   }
 
   render(){
@@ -189,15 +201,17 @@ export default class RecordScreen extends React.Component
     return (
       <View style={styles.container} >
         <Header />
+
+        {/* Modals for food entry */}
         <ImageModal {...this.state} toggleModal={this.toggleModal} getNutritionData={this.getNutritionData} />
         <SuccessModal {...this.state} toggleSuccessModal={this.toggleSuccessModal} />
+        <ManualEntryModal {...this.state} toggleManualEntryModal={this.toggleManualEntryModal} getNutritionData={this.getNutritionData} />
 
         <Camera 
           style={styles.camera} 
           type={this.state.type} 
           ref={ref => { this.camera = ref; }}
         >
-          <Button title="Toggle Modal" onPress={this.toggleModal} />
           <View style={styles.cameraCaptionBox} >
             <Text style={styles.cameraCaptionText} >Please allow several seconds for image processing</Text>
           </View>
@@ -213,7 +227,7 @@ export default class RecordScreen extends React.Component
             <Ionicons name="ios-radio-button-on" size={90} color="grey" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.manualEntryBox} >
+          <TouchableOpacity style={styles.manualEntryBox} onPress={this.toggleManualEntryModal} >
             <FontAwesome5 name="pencil-alt" size={20} color="grey" />
           </TouchableOpacity>
         </View>

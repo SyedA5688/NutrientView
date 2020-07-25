@@ -27,7 +27,7 @@ export default class SuccessModal extends React.Component
           <View style={styles.modalView} >
             <View style={styles.content} >
               <Text style={styles.modalText} >Successfully added nutrition data from food entry</Text>
-              <Ionicons name="ios-nutrition" size={24} color="darkorange" />
+              <Ionicons name="ios-nutrition" size={45} color="darkorange" />
             </View>
             <Button title="OK" onPress={this.toggleModal} />
           </View>
