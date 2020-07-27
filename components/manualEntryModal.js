@@ -31,14 +31,13 @@ export default class ManualEntrymageModal extends React.Component
       return;
     }
     this.props.getNutritionData(this.state.quantity, this.state.enteredFood, this.state.selectedMeal);
-    this.toggleModal();
     this.setState({ selectedMeal: "Lunch", enteredFood: null, quantity: "1" });
-    
+    this.toggleModal();
   }
 
   onCancelPress = () => {
-    this.toggleModal();
     this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, });
+    this.toggleModal();
   }
   
   render(){

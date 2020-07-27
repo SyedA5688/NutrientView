@@ -37,14 +37,14 @@ export default class ImageModal extends React.Component
     this.props.getNutritionData(this.state.quantity, this.state.selectedFood, this.state.selectedMeal);
 
     // Close modal, reset state
-    this.toggleModalView();
     this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, quantity: "1" });
+    this.toggleModalView();
     
   }
 
   onCancelPress = () => {
-    this.toggleModalView();
     this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, quantity: "1" });
+    this.toggleModalView();
   }
   
   render(){

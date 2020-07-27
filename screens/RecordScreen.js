@@ -95,6 +95,10 @@ export default class RecordScreen extends React.Component
       })
   }
 
+  deleteFirebaseImage = () => {
+
+  }
+
   callImageRecognition = async (fileUrl) => {
     const options = {
       headers: {
@@ -135,15 +139,24 @@ export default class RecordScreen extends React.Component
           Alert.alert("Was not able to find food item in database, unable to log nutrients");
           return;
         }
-        if ("SUGAR.added" in data.totalNutrients) {
-          delete data.totalNutrients["SUGAR.added"];
-        }
+        // Clean data
+        if ("SUGAR.added" in data.totalNutrients) { delete data.totalNutrients["SUGAR.added"]; } // Added sugars
+        if ("SUGAR" in data.totalNutrients) { delete data.totalNutrients["SUGAR"]; } // Added sugars
+        if ("FAPU" in data.totalNutrients) { delete data.totalNutrients["FAPU"]; } // Polyunsaturated fats 
+        if ("FAMS" in data.totalNutrients) { delete data.totalNutrients["FAMS"]; } // Monounsaturated fats
+        if ("FATRN" in data.totalNutrients) { delete data.totalNutrients["FATRN"]; } // Trans fats
+        if ("WATER" in data.totalNutrients) { delete data.totalNutrients["WATER"]; } // Water
+        if ("FOLAC" in data.totalNutrients) { delete data.totalNutrients["FOLAC"]; } // Folic Acid
+        if ("FOLDFE" in data.totalNutrients) { delete data.totalNutrients["FOLDFE"]; } // Folate Total (redundant)
+        if ("FOLFD" in data.totalNutrients) { data.totalNutrients["FOLFD"].label = "Folate"; } // Folate Total (redundant)
+        if ("ENERC_KCAL" in data.totalNutrients) { data.totalNutrients["ENERC_KCAL"].label = "Calories"; } // Folate Total (redundant)
+
         this.setState({ nutrientList: data.totalNutrients });
         this.updateFirebaseData(quantity, foodName, meal);
         this.toggleSuccessModal();
       })
       .catch(error => {
-        Alert.alert("Error in retrieving nutritional information: " + error);
+        Alert.alert("Couldn't retrieve nutritional information, try again: " + error);
         return;
       })
   }
@@ -153,7 +166,7 @@ export default class RecordScreen extends React.Component
     let uid = firebase.auth().currentUser.uid;
     let time = new Date();
     let dateStr = time.getMonth() + "-" + time.getDate()
-    const databaseRef = firebase.database().ref().child('users').child(uid).child("NutritionReports").child(time.getFullYear()).child(monthNames[time.getMonth()]).child(dateStr);
+    const databaseRef = firebase.database().ref('users/' + uid + "/NutritionReports/" + time.getFullYear() + "/" + monthNames[time.getMonth()] + "/" + dateStr);
     // Update nutrient info in firebase
     databaseRef.child("Nutrients").once("value").then(snapshot => {
       if (!snapshot.exists()) {
@@ -174,9 +187,20 @@ export default class RecordScreen extends React.Component
     });
 
     // Update food name and meal in firebase
-    databaseRef.child("Meals").child(meal).push({
-      "food": foodName
-    });
+    databaseRef.child("Meals").child(meal).once('value', (snapshot) => {
+      if (snapshot.exists()) {
+        // Get next number
+        let updates = {};
+        let nextNum = Object.keys(snapshot.val()).length + 1;
+        updates[nextNum] = foodName;
+        databaseRef.child("Meals").child(meal).update(updates);
+      } else {
+        // First entry for meal, use number 1
+        let updates = {};
+        updates["1"] = foodName;
+        databaseRef.child("Meals").child(meal).update(updates);
+      }
+    })
   }
 
   toggleModal = () => {

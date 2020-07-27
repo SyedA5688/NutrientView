@@ -39,7 +39,7 @@ export default {
     "quantity": 25,
     "unit": "g",
   },
-  "FOLDFE": {
+  "FOLFD": {
     "label": "Folate equivalent (total)",
     "quantity": 400,
     "unit": "µg",

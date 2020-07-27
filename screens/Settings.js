@@ -18,7 +18,7 @@ export default class SettingsScreen extends React.Component
         <View style={styles.content} >
           <Text style={styles.titleText} >Settings</Text>
           <TouchableOpacity style={[styles.card, {borderTopWidth: 1}]} >
-            <Text style={styles.cardText} >About</Text>
+            <Text style={styles.cardText} >About App</Text>
             <SimpleLineIcons name="arrow-right" size={18} color="grey" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.card} >
@@ -30,8 +30,11 @@ export default class SettingsScreen extends React.Component
             <SimpleLineIcons name="arrow-right" size={18} color="grey" />
           </TouchableOpacity>
 
-
-          <Button title="Signout" onPress={this.onSignoutPress} />
+          <View style={styles.signoutContainer} >
+            <TouchableOpacity style={styles.signoutButton} onPress={this.onSignoutPress} >
+              <Text style={styles.signoutButtonText} >Signout</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     )
@@ -44,6 +47,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'papayawhip',
   },
   content: {
+    flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 30,
   },
@@ -67,4 +71,20 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'grey',
   },
+  signoutContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  signoutButton: {
+    borderWidth: 1,
+    borderColor: 'black',
+    backgroundColor: 'lightgrey',
+    borderRadius: 10,
+    paddingVertical: 3,
+    width: '30%'
+  },
+  signoutButtonText: {
+    fontSize: 20,
+    textAlign: 'center',
+  }
 });
