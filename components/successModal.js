@@ -6,16 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 export default class SuccessModal extends React.Component
 {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedMeal: "Lunch",
-      selectedId: null,
-      selectedFood: null,
-      quantity: "1",
-    }
-  }
-
   toggleModal = () => {
     this.props.toggleSuccessModal();
   }
@@ -45,7 +35,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     width: (Dimensions.get('window').width - 40),
-    padding: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
     alignItems: 'center',
   },
   content: {

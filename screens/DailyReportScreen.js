@@ -25,7 +25,8 @@ export default class DailyReportScreen extends React.Component
     // Retrieve data from firebase, add listener to keep meal info and nutrient totals updated
     let uid = firebase.auth().currentUser.uid;
     let time = new Date();
-    let dateStr = time.getMonth() + "-" + time.getDate()
+    let monthNum = parseInt(time.getMonth()) + 1;
+    let dateStr = monthNum.toString() + "-" + time.getDate()
     const databaseRef = firebase.database().ref('users/' + uid + "/NutritionReports/" + time.getFullYear() + "/" + monthNames[time.getMonth()] + "/" + dateStr);
     const mealRef = databaseRef.child("Meals");
     const nutritionRef = databaseRef.child("Nutrients");

@@ -96,7 +96,7 @@ export default class RecordScreen extends React.Component
   }
 
   deleteFirebaseImage = () => {
-
+    // Delete image after a set time interval
   }
 
   callImageRecognition = async (fileUrl) => {
@@ -152,8 +152,8 @@ export default class RecordScreen extends React.Component
         if ("ENERC_KCAL" in data.totalNutrients) { data.totalNutrients["ENERC_KCAL"].label = "Calories"; } // Folate Total (redundant)
 
         this.setState({ nutrientList: data.totalNutrients });
-        this.updateFirebaseData(quantity, foodName, meal);
         this.toggleSuccessModal();
+        this.updateFirebaseData(quantity, foodName, meal);
       })
       .catch(error => {
         Alert.alert("Couldn't retrieve nutritional information, try again: " + error);
@@ -165,7 +165,8 @@ export default class RecordScreen extends React.Component
     // Upload nutrition data to firebase database
     let uid = firebase.auth().currentUser.uid;
     let time = new Date();
-    let dateStr = time.getMonth() + "-" + time.getDate()
+    let monthNum = parseInt(time.getMonth()) + 1; // Months are 0-11, change to 1-12
+    let dateStr = monthNum.toString() + "-" + time.getDate()
     const databaseRef = firebase.database().ref('users/' + uid + "/NutritionReports/" + time.getFullYear() + "/" + monthNames[time.getMonth()] + "/" + dateStr);
     // Update nutrient info in firebase
     databaseRef.child("Nutrients").once("value").then(snapshot => {
@@ -200,7 +201,7 @@ export default class RecordScreen extends React.Component
         updates["1"] = foodName;
         databaseRef.child("Meals").child(meal).update(updates);
       }
-    })
+    });
   }
 
   toggleModal = () => {

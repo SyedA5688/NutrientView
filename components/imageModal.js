@@ -33,13 +33,11 @@ export default class ImageModal extends React.Component
     }
 
     // Send request to nutrition API, add to daily log of nutrients
-    //console.log("Meal: " + this.state.selectedMeal + ", Quantity: " + this.state.quantity + ", Selected Food: " + this.state.selectedFood);
     this.props.getNutritionData(this.state.quantity, this.state.selectedFood, this.state.selectedMeal);
 
     // Close modal, reset state
     this.setState({ selectedMeal: "Lunch", selectedId: null, selectedFood: null, quantity: "1" });
     this.toggleModalView();
-    
   }
 
   onCancelPress = () => {
