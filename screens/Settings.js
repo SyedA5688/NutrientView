@@ -1,12 +1,19 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, TouchableOpacity } from 'react-native';
-import Header from '../components/header';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SimpleLineIcons } from '@expo/vector-icons'; 
 import * as firebase from 'firebase';
 
 
 export default class SettingsScreen extends React.Component
 {
+  onAboutPress = () => {
+    this.props.navigation.navigate("About");
+  }
+
+  onMoreInfoPress = () => {
+    this.props.navigation.navigate("More Info");
+  }
+
   onSignoutPress = () => {
     firebase.auth().signOut();
   }
@@ -14,19 +21,15 @@ export default class SettingsScreen extends React.Component
   render(){
     return (
       <View style={styles.container} >
-        <Header />
+        {/* <Header /> */}
         <View style={styles.content} >
           <Text style={styles.titleText} >Settings</Text>
-          <TouchableOpacity style={[styles.card, {borderTopWidth: 1}]} >
+          <TouchableOpacity style={[styles.card, {borderTopWidth: 1}]} onPress={this.onAboutPress} >
             <Text style={styles.cardText} >About App</Text>
             <SimpleLineIcons name="arrow-right" size={18} color="grey" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.card} >
-            <Text style={styles.cardText} >Profile</Text>
-            <SimpleLineIcons name="arrow-right" size={18} color="grey" />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.card, {borderBottomWidth: 1}]} >
-            <Text style={styles.cardText} >Account</Text>
+          <TouchableOpacity style={[styles.card, {borderTopWidth: 1}]} onPress={this.onMoreInfoPress} >
+            <Text style={styles.cardText} >Nutrition Resources</Text>
             <SimpleLineIcons name="arrow-right" size={18} color="grey" />
           </TouchableOpacity>
 
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
   },
   signoutContainer: {
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 40,
   },
   signoutButton: {
     borderWidth: 1,

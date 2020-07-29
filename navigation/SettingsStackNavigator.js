@@ -1,9 +1,9 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 // Screens
-import LoginScreen from '../screens/auth/LoginScreen';
-import SignupScreen from '../screens/auth/SignupScreen';
-import ForgotPassScreen from '../screens/auth/ForgotPassScreen';
+import Settings from '../screens/Settings';
+import About from '../components/about';
+import MoreInfo from '../components/moreInfo';
 
 
 const Stack = createStackNavigator();
@@ -12,8 +12,8 @@ export default function LoginStackNavigator(){
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Login" 
-        component={LoginScreen} 
+        name="Settings" 
+        component={Settings} 
         options={{
           title: 'NutrientView',
           headerStyle: {
@@ -28,10 +28,10 @@ export default function LoginStackNavigator(){
         }}
       />
       <Stack.Screen 
-        name="Signup" 
-        component={SignupScreen} 
+        name="About" 
+        component={About} 
         options={{
-          title: 'Signup',
+          title: 'NutrientView',
           headerStyle: {
             backgroundColor: 'burlywood',
             height: 90,
@@ -45,10 +45,10 @@ export default function LoginStackNavigator(){
         }}
       />
       <Stack.Screen 
-        name="Forgot Password" 
-        component={ForgotPassScreen} 
+        name="More Info" 
+        component={MoreInfo} 
         options={{
-          title: 'Forgot Password',
+          title: 'NutrientView',
           headerStyle: {
             backgroundColor: 'burlywood',
             height: 90,

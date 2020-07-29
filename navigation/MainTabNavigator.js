@@ -6,7 +6,8 @@ import DailyReportScreen from '../screens/DailyReportScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 import RecordScreen from '../screens/RecordScreen';
 import ChatBotScreen from '../screens/ChatBotScreen';
-import SettingsScreen from '../screens/Settings';
+//import SettingsScreen from '../screens/Settings';
+import SettingsStackNavigator from './SettingsStackNavigator';
 
 
 const Tab = createBottomTabNavigator();
@@ -47,7 +48,7 @@ export default function MainTabNavigator(){
       <Tab.Screen name="Calendar" component={CalendarScreen} />
       <Tab.Screen name="Record" component={RecordScreen} />
       <Tab.Screen name="Chat" component={ChatBotScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Settings" component={SettingsStackNavigator} />
     </Tab.Navigator>
   )
 }
