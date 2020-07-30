@@ -12,9 +12,15 @@ function already. This app is instead focused on giving users a clean and easily
 to show them what nutrient deficiencies their current diets put them in.
 
 Features of the app include:
-- An image recognition option for logging food or meals
-- A daily nutrition report, as well as a calendar view
-- A chatbot that can answer simple nutrition questions for the user and elaborates on the daily nutrition report
-  of the user
+- Image recognition and manual entry options for logging meals
+- Daily nutrient progress view
+- Calendar that can pull up nutrient deficiency data from past days
+- A Q&A bot service that can give users basic information about important nutrients
 
-This app was developed using the...
+Services used by this project:
+- IBM Watson food image recognition
+- Edamam Nutrition Analysis API service
+- Microsoft Azure Bot Service, QnA maker, and Cognitive Services
+- Firebase Realtime Database, Storage, and Hosting
+
+Developed using React Native/Expo.
