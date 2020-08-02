@@ -22,7 +22,7 @@ export default class ChatbotScreen extends React.Component
         {/* Web chat is embedded in an html file, deployed on firebase hosting.
             Code for html file not uploaded to github, use link to link in WebView */}
         <WebView 
-          source={{ uri: 'https://nutrientview.web.app/' }}
+          source={{ uri: 'https://nutrientview.firebaseapp.com/' }}
         />
         </View>
       </View>
@@ -33,17 +33,17 @@ export default class ChatbotScreen extends React.Component
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'papayawhip',
+    backgroundColor: 'white',
   },
   webviewContainer: {
     width: '100%',
-    height: '30%',
-    marginTop: 10,
+    height: '100%',
     padding: 10,
   },
   card: {
     borderWidth: 0.5,
     borderColor: 'black',
+    backgroundColor: 'papayawhip',
     borderRadius: 10,
     margin: 15,
     paddingVertical: 10,
